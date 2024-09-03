@@ -1,12 +1,20 @@
 const express = require("express");
 const mongoose = require("mongoose");
 const path = require('path');
+const multer = require('multer');
+const categoryrouter= require('./Routers/categoryrouter')
+const subcategoryrouter= require('./Routers/subcategoryrouter')
+const postrouter= require('./Routers/postrouter')
+const userrouter= require('./Routers/userrouter')
+const imagerouter= require('./Routers/imagerouter.js')
 const dotenv = require("dotenv").config();
 const cors = require("cors");
 const UserModel = require("./models/user.model.js");
 const app = express();
+const morgan = require('morgan')
 
 app.use(express.json());
+app.use(morgan('dev'));
 app.use(cors());
 app.use(express.static(path.join(__dirname, 'build')));
 
@@ -20,15 +28,13 @@ mongoose.connect(process.env.MONGO_URI)
     });
   
 
-    app.get("/", (req,res)=>{
-        return res.status(200).send({
-            success:true,
-            message:"Hii, server is working"
-        })
-    })
-    app.get('*', (req, res) => {
-        res.sendFile(path.join(__dirname, 'build', 'index.html'));
-      });
+    // app.get("/", (req,res)=>{
+    //     return res.status(200).send({
+    //         success:true,
+    //         message:"Hii, server is working"
+    //     })
+    // })
+   
 app.post("/send-details", async (req, res) => {
     const {
         displayName, 
@@ -76,6 +82,18 @@ app.post("/send-details", async (req, res) => {
         });
     }
 });
+
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
+app.use("/category",categoryrouter)
+app.use("/subcategory",subcategoryrouter)
+app.use("/blogpost",postrouter)
+app.use("/user",userrouter)
+app.use("/image",imagerouter)
+
+app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname, 'build', 'index.html'));
+  });
 const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, () => {
